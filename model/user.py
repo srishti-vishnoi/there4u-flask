@@ -1,12 +1,14 @@
 # id, email(unique), name, city, state, pincode, balance, password, created_at, updated_at,
 # first_name, last_name, is_active
-from dataclasses import dataclass, field
-from sqlalchemy.orm import load_only
+from model.restaurants import RestaurantSchema, restaurant_owner
+from sqlalchemy.orm import backref
 from extensions import db, ma
 from marshmallow import fields, validate
+from werkzeug.security import generate_password_hash
 
-@dataclass
 class User(db.Model):
+    __tablename__ = 'user'
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     name = db.Column(db.String(100))
@@ -20,18 +22,25 @@ class User(db.Model):
     is_active = db.Column(db.Boolean)
     is_owner = db.Column(db.Boolean)
 
+    token = db.relationship('AuthToken', uselist=False, cascade='all,delete')
+    # token = db.Column(db.Integer, db.ForeignKey('AuthToken.id'), nullable= False)
+
+    restaurants = db.relationship('Restaurant', secondary=restaurant_owner, backref = db.backref('owners', lazy='dynamic'), lazy='joined')
 
     def __init__(self, name, email, password, city, state, zipcode, is_owner = False):
         self.name = name
         self.email = email
         self.balance = 1000
-        self.password = password
+        self.password = generate_password_hash(password=password)
         self.city = city
         self.state = state
         self.zipcode = zipcode
         self.is_owner = is_owner
         self.is_active = True
         [self.first_name, self.last_name] = name.split(" ")
+
+    def __str__(self) -> str:
+        return self.name+'::' + self.email
 
 class CreateUserSchema(ma.Schema):
     id= fields.UUID(dump_only=True)
@@ -59,6 +68,7 @@ class UserSchema(ma.Schema):
     city = fields.String(required=True, validate=validate.Length(min=3, max=50) )
     state = fields.String(required=True, validate=validate.Length(min=3, max=50) )
     zipcode = fields.String(required=True, validate=validate.Length(min=6, max=8) )
+    restaurants = fields.List(fields.Nested(RestaurantSchema))
 
     class Meta:
         model = User
