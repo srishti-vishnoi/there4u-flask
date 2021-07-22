@@ -1,6 +1,3 @@
-# id, email(unique), name, city, state, pincode, balance, password, created_at, updated_at,
-# first_name, last_name, is_active
-from model.restaurants import RestaurantSchema, restaurant_owner
 from sqlalchemy.orm import backref
 from extensions import db, ma
 from marshmallow import fields, validate
@@ -23,9 +20,8 @@ class User(db.Model):
     is_owner = db.Column(db.Boolean)
 
     token = db.relationship('AuthToken', uselist=False, cascade='all,delete')
-    # token = db.Column(db.Integer, db.ForeignKey('AuthToken.id'), nullable= False)
 
-    restaurants = db.relationship('Restaurant', secondary=restaurant_owner, backref = db.backref('owners', lazy='dynamic'), lazy='joined')
+    restaurants = db.relationship('Restaurant', secondary='restaurant_owner', backref = db.backref('owners', lazy='dynamic'), lazy='joined')
 
     def __init__(self, name, email, password, city, state, zipcode, is_owner = False):
         self.name = name
@@ -43,7 +39,7 @@ class User(db.Model):
         return self.name+'::' + self.email
 
 class CreateUserSchema(ma.Schema):
-    id= fields.UUID(dump_only=True)
+    id= fields.Integer(dump_only=True)
     email = fields.Email()
     name = fields.String(required=True, validate=validate.Length(min=8, max=100))
     first_name  =fields.String(dump_only=True)
@@ -68,7 +64,7 @@ class UserSchema(ma.Schema):
     city = fields.String(required=True, validate=validate.Length(min=3, max=50) )
     state = fields.String(required=True, validate=validate.Length(min=3, max=50) )
     zipcode = fields.String(required=True, validate=validate.Length(min=6, max=8) )
-    restaurants = fields.List(fields.Nested(RestaurantSchema))
+    restaurants = fields.List(fields.Nested('RestaurantSchema', only=('id',)))
 
     class Meta:
         model = User

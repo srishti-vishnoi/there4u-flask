@@ -2,6 +2,13 @@ from model.auth_token import AuthToken
 import jwt
 from settings import SECRET_KEY
 from extensions import db
+from flask_httpauth import HTTPTokenAuth
+
+auth = HTTPTokenAuth()
+
+@auth.verify_token
+def verify_token(headers):
+    return authenticate(headers)
 
 def encode_auth_token(user):
     try:

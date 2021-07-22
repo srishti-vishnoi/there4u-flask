@@ -6,11 +6,7 @@ from marshmallow.exceptions import ValidationError
 from model.user import User as user_model, create_user_schema, user_schema
 from extensions import db
 from werkzeug.security import check_password_hash
-from services.auth import authenticate, encode_auth_token
-from flask_httpauth import HTTPTokenAuth
-
-
-auth = HTTPTokenAuth()
+from services.auth import encode_auth_token, auth
 
 
 class CreateUser(Resource):
@@ -28,9 +24,7 @@ class CreateUser(Resource):
         except:
             return {}, 500
 
-@auth.verify_token
-def verify_token(headers):
-    return authenticate(headers)
+
 
 class User(Resource):
     @auth.login_required
