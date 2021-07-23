@@ -23,6 +23,8 @@ class User(db.Model):
 
     restaurants = db.relationship('Restaurant', secondary='restaurant_owner', backref = db.backref('owners', lazy='dynamic'), lazy='joined')
 
+    orders = db.relationship('Order', backref = 'order_owners', cascade='all,delete')
+
     def __init__(self, name, email, password, city, state, zipcode, is_owner = False):
         self.name = name
         self.email = email

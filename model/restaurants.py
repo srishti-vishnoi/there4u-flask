@@ -11,7 +11,7 @@ class RestaurantItem(db.Model):
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
     
-    def __str__(self,name, price, quantity = 1):
+    def __init__(self,name, price, quantity = 1):
         self.name = name
         self.price = price
         self.price = quantity
@@ -36,6 +36,7 @@ class Restaurant(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
+    orders = db.relationship('Order', backref = 'restaurant')
     items = db.relationship('RestaurantItem', backref = 'restaurant', cascade='all,delete')
 
 class RestaurantSchema(ma.Schema):
