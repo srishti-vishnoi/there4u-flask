@@ -1,0 +1,9 @@
+Flask
+Flask-RESTful
+Flask-Admin
+Flask-SQLAlchemy
+Flask_marshmallow
+SQLAlchemy
+marshmallow
+Flask-HTTPAuth
+pyjwt
