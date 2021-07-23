@@ -6,6 +6,7 @@ from services.auth import auth
 from model.order import Order as order_model, OrderItem, order_schema, orders_schema, order_item_schema, order_items_schema
 from model.user import User as user_model, user_schema
 from services.auth import auth
+from sqlalchemy import desc
 
 class CreateAndListOrder(Resource):
 
@@ -38,7 +39,7 @@ class CreateAndListOrder(Resource):
         
         order.total_amount = total_amount
         order.user_id = user.id
-        order.restaurant_id = 1
+        order.restaurant_id = 2
         order.items = order_items
         order.user_id = auth.current_user()
         user.balance -= total_amount
@@ -49,7 +50,7 @@ class CreateAndListOrder(Resource):
 
     @auth.login_required
     def get(self):
-        orders = order_model.query.filter_by(user_id = auth.current_user())
+        orders = order_model.query.filter_by(user_id = auth.current_user()).order_by(desc('total_amount') )
         return orders_schema.dump(orders), 200
 
 
